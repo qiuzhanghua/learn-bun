@@ -7,6 +7,16 @@ import (
 	"github.com/uptrace/bun"
 )
 
+type Book struct {
+	ID       int64
+	AuthorID int64
+	Author   Author `bun:"rel:belongs-to,join:author_id=id"`
+}
+
+type Author struct {
+	ID int64 `bun:"id,pk,autoincrement"`
+}
+
 type User struct {
 	bun.BaseModel `bun:"table:users,alias:u"`
 
@@ -17,7 +27,8 @@ type User struct {
 
 func main() {
 	defer db.Close()
-	err := db.ResetModel(context.Background(), (*User)(nil))
+
+	err := db.ResetModel(context.Background(), (*User)(nil), (*Book)(nil), (*Author)(nil))
 	if err != nil {
 		panic(err)
 	}
