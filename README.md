@@ -7,7 +7,7 @@ https://bun.uptrace.dev/
 
 ```env
 
-ACTIVE_DB=sqlite # mysql, pg, sqlite, mssql
+ACTIVE_DB=mysql # mysql, pg, sqlite, mssql
 
 SQLITE_PATH=memory
 # SQLITE_PATH=/tmp/bun.db
