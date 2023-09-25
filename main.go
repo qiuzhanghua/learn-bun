@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"github.com/uptrace/bun"
 )
 
@@ -39,5 +38,5 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(num)
-	//defer sqldb.Close()
+
 }
