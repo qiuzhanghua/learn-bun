@@ -13,6 +13,7 @@ import (
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"github.com/uptrace/bun/driver/sqliteshim"
+	"github.com/uptrace/bun/extra/bundebug"
 
 	"os"
 )
@@ -36,6 +37,7 @@ func init() {
 	default:
 		panic("Invalid ACTIVE_DB")
 	}
+	db.AddQueryHook(bundebug.NewQueryHook(bundebug.FromEnv("BUNDEBUG")))
 }
 
 func initSqlite() {

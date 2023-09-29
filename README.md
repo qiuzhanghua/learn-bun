@@ -6,6 +6,8 @@ https://bun.uptrace.dev/
 ## init a .env file for bun
 
 ```env
+#  0-> Disable; 1 -> Enable; 2 -> Enable with verbose
+BUNDEBUG=2
 
 ACTIVE_DB=mysql # mysql, pg, sqlite, mssql
 
