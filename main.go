@@ -2,19 +2,22 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/uptrace/bun"
 )
 
 type Book struct {
-	ID       int64 `bun:"id,pk,autoincrement"`
-	AuthorID int64
-	Author   *Author `bun:"rel:belongs-to,join:author_id=id"`
+	bun.BaseModel `bun:"table:books"`
+	ID            int64 `bun:"id,pk,autoincrement"`
+	AuthorID      int64
+	Author        *Author `bun:"rel:belongs-to,join:author_id=id"`
 }
 
 type Author struct {
-	ID   int64 `bun:"id,pk,autoincrement"`
-	Book *Book `bun:"rel:has-one"`
+	bun.BaseModel `bun:"table:authors"`
+	ID            int64 `bun:"id,pk,autoincrement"`
+	Book          *Book `bun:"rel:has-one"`
 }
 
 type User struct {
@@ -73,5 +76,52 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(num)
+	err = InsertBookAndUser()
+	fmt.Println(err)
 
+	book := &Book{}
+	err = db.NewSelect().Model(book). // model
+						Relation("Author").                 // relation
+						Where("`book`.`id` = 2").           // left join
+						Where("`author`.`id` IS NOT NULL"). // simulate inner join
+						Scan(ctx, book)
+	fmt.Println(err)
+	fmt.Println(book)
+}
+
+func InsertBookAndUser() error {
+	ctx := context.Background()
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Commit()
+
+	// Insert a new Author
+	author := &Author{}
+
+	answer, err := tx.NewInsert().Model(author).Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return errors.New("insert author: " + err.Error())
+	}
+	fmt.Println(author)
+	book := &Book{}
+	book.AuthorID = author.ID
+	answer, err = tx.NewInsert().Model(book).Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return errors.New("insert book: " + err.Error())
+	}
+	fmt.Println(answer)
+
+	// Or update an existing Author
+	book.AuthorID = author.ID
+	answer, err = tx.NewUpdate().Model(book).Column("author_id").WherePK().Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return errors.New("update book: " + err.Error())
+	}
+	fmt.Println(answer)
+	return nil
 }
